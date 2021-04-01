@@ -1,5 +1,5 @@
 <template>
-  <v-app style="background-color:#f3f3f3;">
+  <v-app style="background-color: #f3f3f3">
     <nav-bar></nav-bar>
     <div>
       <div class="solid">
@@ -18,7 +18,7 @@
 
           <v-card-actions class="justify-space-between">
             <v-btn text @click="prev">
-              <v-icon>mdi-chevron-left</v-icon>
+              <img src="../../assets/icon/hou.png"/>
             </v-btn>
             <v-item-group v-model="onboarding" class="text-center" mandatory>
               <v-item
@@ -27,12 +27,12 @@
                 v-slot="{ active, toggle }"
               >
                 <v-btn :input-value="active" icon @click="toggle">
-                  <v-icon>mdi-record</v-icon>
+                  <img src="../../assets/icon/dain.png"/>
                 </v-btn>
               </v-item>
             </v-item-group>
             <v-btn text @click="next">
-              <v-icon>mdi-chevron-right</v-icon>
+              <img style="width:30px;height30px;" src="../../assets/icon/prev.png"/>
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -40,8 +40,8 @@
 
       <div class="miaosha">
         <div class="miaosha-border">
-          <h1 style="margin-top:20px;">骸冰秒杀</h1>
-          <img class="dian" src="../../assets/icon/dian.png"/>
+          <h1 style="margin-top: 20px">骸冰秒杀</h1>
+          <img class="dian" src="../../assets/icon/dian.png" />
           <div class="daojishi">
             <p class="time-border margin">倒</p>
             <p class="margin">:</p>
@@ -52,36 +52,36 @@
         </div>
 
         <div>
-          <v-sheet class="mx-auto" elevation="8" max-width="880">
+          <v-sheet class="mx-auto" elevation="8" width="880">
             <v-slide-group
               v-model="model"
               class="pa-4"
               active-class="success"
               show-arrows
+              prev-icon="«"
+              next-icon="»"
             >
-              <v-slide-item
-                v-for="n in 10"
-                :key="n"
-                v-slot="{ active}"
-              >
+              <v-slide-item v-for="(item, index) in goods" :key="index">
                 <v-card
-                  :color="active ? undefined : 'teal lighten-1'"
                   class="ma-1"
-                  height="350"
-                  width="200"
-                 
-                  @click="goGoods()"
+                  height="370"
+                  width="250"
+                  @click="goGoods(item)"
                 >
-                  <v-row class="fill-height" align="center" justify="center">
-                    <v-scale-transition>
-                      <v-icon
-                        v-if="active"
-                        color="white"
-                        size="48"
-                        v-text="'mdi-close-circle-outline'"
-                      ></v-icon>
-                    </v-scale-transition>
-                  </v-row>
+                  <img class="goodsImg" :src="item.image" />
+
+                  <v-card-title
+                    >{{ item.description }} {{ item.goodName }}</v-card-title
+                  >
+
+                  <v-card-text>
+                    <v-row align="center" class="mx-0"> </v-row>
+
+                    <div class="my-4 subtitle-1">
+                      <span class="type">{{ item.type }}</span>
+                      <span> ${{ item.price }}</span>
+                    </div>
+                  </v-card-text>
                 </v-card>
               </v-slide-item>
             </v-slide-group>
@@ -102,7 +102,19 @@ export default {
       length: 3,
       onboarding: 0,
       model: null,
+      goods: [],
     };
+  },
+  mounted: function () {
+    var params = new URLSearchParams();
+    params.append("currentPage", "1");
+    params.append("pageSize", "10");
+    this.axios
+      .post(this.GLOBAL.contentUrl + "/goods/findAllGoods", params)
+      .then((res) => {
+        this.goods = res.data.data.Goods.content;
+        console.log(this.goods);
+      });
   },
   methods: {
     next() {
@@ -113,9 +125,9 @@ export default {
       this.onboarding =
         this.onboarding - 1 < 0 ? this.length - 1 : this.onboarding - 1;
     },
-    goGoods() {
-      this.$router.push("/goods");
-    }
+    goGoods(goods) {
+      this.$router.push({ path: "/goods", query: { goodsInfo: goods } });
+    },
   },
   components: {
     NavBar,
@@ -155,8 +167,17 @@ export default {
   background: #ffffff;
 }
 .dian {
-  width:50px;
+  width: 50px;
   height: 50px;
   margin-top: 80px;
+}
+.goodsImg {
+  width: 250px;
+  height: 240px;
+}
+.type {
+  background-color: #26a69a;
+  color: #ffffff;
+  padding: 5px;
 }
 </style>
