@@ -75,8 +75,21 @@ export default {
   name: "HomePage",
   data() {
     return {
-      tab: null
+      tab: null,
+      order:[]
     };
+  },
+  mounted:function(){
+    let params = new URLSearchParams();
+    let id = localStorage.getItem("userId");
+    console.log(id)
+    params.append("pkUserId", id);
+    this.axios
+      .post(this.GLOBAL.contentUrl + "/order/findUserAllOrder", params)
+      .then((res) => {
+        this.order = res.data.data.Goods.content;
+        console.log(this.goods);
+      });
   },
   components: {
     NavBar,

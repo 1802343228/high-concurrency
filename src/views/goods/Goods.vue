@@ -31,17 +31,31 @@
           </div>
         </div>
 
-        <div style="margin-top:30px;margin-left: 5px;">
-          <span style="color: gray;">购买数量</span>
+        <div style="margin-top: 30px; margin-left: 5px">
+          <span style="color: gray">购买数量</span>
           <button @click="btnMinute" class="btn_minute">-</button>
-          <input class="input" type="text"  size="1" v-model="count" />
+          <input class="input" type="text" size="1" v-model="count" />
           <button @click="btnAdd" class="btn_add">+</button>
-          <span style="color:gray;margin-left:10px;">(库存：{{goodsInfo.count}})</span>
+          <span style="color: gray; margin-left: 10px"
+            >(库存：{{ goodsInfo.count }})</span
+          >
         </div>
 
-        <div style="margin-top:30px;margin-left: 5px;">
-          <button class="btn">立即购买</button>
+        <div style="margin-top: 30px; margin-left: 5px">
+          <button @click="sumbitGoods()" class="btn">立即购买</button>
         </div>
+      </div>
+    </div>
+    <div class="comm">
+      <div class="comment">商品评价</div>
+
+      <div v-for="(item,index) in comments" :key="index" style="margin-top: 30px">
+        <img class="user_avatar" src="../../assets/images/me.jpg" />
+        <div style="margin-top: -40px">
+          <span style="margin: 50px">用户名</span>
+          <span style="margin-left: 100px">{{item.content}}</span>
+        </div>
+        <div class="line"></div>
       </div>
     </div>
   </v-app>
@@ -49,17 +63,21 @@
 
 <script>
 import NavBar from "../../components/NavBar";
+const API = require("../../utils/request.js");
 export default {
   name: "HomePage",
   data() {
     return {
       goodsInfo: [],
       count: 0,
+      comments: [],
     };
   },
   mounted: function () {
     this.goodsInfo = this.$route.query.goodsInfo;
-    console.log(this.goodsInfo);
+    localStorage.setItem("goods", this.goodsInfo);
+    console.log(localStorage.getItem("goods"));
+    this.getCommont();
   },
   methods: {
     btnAdd() {
@@ -75,6 +93,28 @@ export default {
       } else {
         this.count -= 1;
       }
+    },
+    async sumbitGoods() {
+      this.url = this.GLOBAL.contentUrl + "/order/addOrder";
+      this.data = {
+        number: this.count,
+        phone: "18851699003",
+        pkGoodId: this.goodsId,
+        userId: localStorage.getItem("userId"),
+      };
+      await API.init(_this.url, _this.data, "post");
+    },
+    getCommont() {
+      let params = new URLSearchParams();
+      params.append("goodId", this.goodsInfo.pkGoodId);
+      this.axios.post(
+        this.GLOBAL.contentUrl + "/comment/selectCommentsById",
+        params
+      ).then((res) => {
+        
+        this.comments = res.data.data
+        console.log(this.comments);
+      })
     },
   },
   components: {
@@ -140,5 +180,26 @@ export default {
   width: 100px;
   height: 50px;
   padding: 10px;
+}
+.line {
+  border: 0.1px solid rgb(240, 237, 237);
+  width: 100%;
+  margin-top: 30px;
+}
+.comm {
+  width: 90%;
+  margin: 100px auto;
+}
+.comment {
+  background-color: #f6f6f6;
+  border: 1px solid #e6e6e6;
+  height: 35px;
+  padding: 5px;
+  color: gray;
+}
+.user_avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 20px;
 }
 </style>

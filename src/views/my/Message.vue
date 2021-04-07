@@ -27,6 +27,7 @@
           </template>
         </v-hover>
 
+
         <div class="btn-col">
           <button @click="submit()" class="btn">提交</button>
         </div>
@@ -48,7 +49,36 @@
           <span style="display: flex; margin-top: 50px">
             <h4>电话</h4>
             <span class="label">
-              <p>{{ user.phone }}</p>
+              <span v-if="phoneInput">
+                <v-text-field
+                  label="电话"
+                  placeholder="请输入电话.."
+                  v-model="validate.phone"
+                ></v-text-field>
+                <v-text-field
+                  label="验证码"
+                  placeholder="请输入验证码.."
+                  v-model="validate.code"
+                ></v-text-field>
+                <span>
+                  <span
+                    @click="sendCode()"
+                    style="coloe: grey; font-size: 0.7rem"
+                    >获取验证码</span
+                  >
+                  <span
+                    @click="verifyCode()"
+                    style="coloe: grey; font-size: 0.7rem"
+                    >验证验证码</span
+                  >
+                </span>
+              </span>
+              <span v-else>{{ user.phone }}</span>
+              <span
+                @click="updatePhone()"
+                style="color: #26a69a; margin-left: 20px"
+                >更改</span
+              >
             </span>
           </span>
           <div class="line"></div>
@@ -56,20 +86,18 @@
           <span style="display: flex; margin-top: 50px">
             <h4>密码</h4>
             <span class="label">
-              <p>
-                <span>**********</span>
-                <span
-                  @click="updateCode()"
-                  style="color: #26a69a; margin-left: 20px"
-                  >更改</span
-                >
-                <v-text-field
-                  v-if="codeInput"
-                  label="密码"
-                  placeholder="请输入密码.."
-                  v-model="validate.password"
-                ></v-text-field>
-              </p>
+              <v-text-field
+                v-if="codeInput"
+                label="密码"
+                placeholder="请输入密码.."
+                v-model="validate.password"
+              ></v-text-field>
+              <span v-else>**********</span>
+              <span
+                @click="updateCode()"
+                style="color: #26a69a; margin-left: 20px"
+                >更改</span
+              >
             </span>
           </span>
           <div class="line"></div>
@@ -77,20 +105,18 @@
           <span style="display: flex; margin-top: 50px">
             <h4>邮箱</h4>
             <span class="label">
-              <p>
-                <span>{{ user.email }}</span>
-                <span
-                  @click="updateEmail()"
-                  style="color: #26a69a; margin-left: 20px"
-                  >更改</span
-                >
-                <v-text-field
-                  v-if="emailInput"
-                  label="邮箱"
-                  placeholder="请输入邮箱.."
-                  v-model="user.email"
-                ></v-text-field>
-              </p>
+              <v-text-field
+                v-if="emailInput"
+                label="邮箱"
+                placeholder="请输入邮箱.."
+                v-model="user.email"
+              ></v-text-field>
+              <span v-else>{{ user.email }}</span>
+              <span
+                @click="updateEmail()"
+                style="color: #26a69a; margin-left: 20px"
+                >更改</span
+              >
             </span>
           </span>
           <div class="line"></div>
@@ -99,10 +125,10 @@
             <h4>性别</h4>
             <span class="label">
               <label
-                ><input type="radio" name="sex" v-model="user.sex" />男</label
+                ><input type="radio" name="sex" v-model="validate.sex" />男</label
               >
               <label style="margin-left: 20px"
-                ><input type="radio" name="sex" v-model="user.sex" />女</label
+                ><input type="radio" name="sex" v-model="validate.sex" />女</label
               >
             </span>
           </span>
@@ -122,19 +148,18 @@
           <span style="display: flex; margin-top: 50px">
             <h4>地址</h4>
             <span class="label">
-              <span>{{ user.address }}</span>
+              <v-text-field
+                v-if="addressInput"
+                label="地址"
+                placeholder="请输入地址。。"
+                v-model="validate.addresss"
+              ></v-text-field>
+              <span v-else>{{ user.address }}</span>
               <span
                 @click="updateAddress()"
                 style="color: #26a69a; margin-left: 20px"
                 >更改</span
               >
-              <v-text-field
-                v-if="addressInput"
-                label="地址"
-                placeholder="Placeholder"
-                filled
-                v-model="user.addresss"
-              ></v-text-field>
             </span>
           </span>
           <div class="line"></div>
@@ -180,15 +205,21 @@ export default {
       emailInput: false,
       addressInput: false,
       codeInput: false,
+      verFaild: false,
+      verSuccess: false,
+      updateSuccess: false,
+      phoneInput: false,
       overlay: false,
       user: [],
       validate: {
         nickname: "",
         sex: "",
         avatar: "",
-        addresss: "",
+        address: "",
         email: "",
         password: "",
+        phone: "",
+        code: "",
       },
     };
   },
@@ -196,17 +227,22 @@ export default {
     NavBar,
   },
   mounted: function () {
-    const id = localStorage.getItem("userId");
+    this.refreshUser()
+    
+  },
+  directives: { clickoutside },
+  methods: {
+    refreshUser() {
+      const id = localStorage.getItem("userId");
     console.log("1111111");
     this.axios
       .get(this.GLOBAL.baseUrl + "/user/getInfoById/" + id)
       .then((res) => {
         console.log(res);
         this.user = res.data.data;
+        localStorage.setItem("user", res.data.data);
       });
-  },
-  directives: { clickoutside },
-  methods: {
+    },
     updateUser() {
       this.userInput = !this.userInput;
     },
@@ -216,6 +252,9 @@ export default {
     updateAddress() {
       this.addressInput = !this.addressInput;
     },
+    updatePhone() {
+      this.phoneInput = !this.phoneInput;
+    },
     updateCode() {
       this.codeInput = !this.codeInput;
     },
@@ -223,27 +262,46 @@ export default {
       this.$refs.file.click();
     },
     async submit() {
-      let sex;
       const _this = this;
       let users = _this.user;
       if (_this.validate.sex === "男") {
-        sex = 1;
+        var sex = 1;
       } else if (_this.validate.sex === "女") {
-        sex = 2;
+        var sex = 2;
+      }else {
+        var sex = users.sex
       }
-      let pwd;
+
       if (_this.validate.password === "") {
-        pwd = "123";
+        var pwd = "123";
       } else {
-        pwd = _this.validate.password;
+        var pwd = _this.validate.password;
+      }
+
+      if (_this.validate.avatar === "") {
+        var avatar = users.avatar;
+      } else {
+        var avatar = _this.validate.avatar;
+      }
+
+      if (_this.validate.code === "") {
+        var code = "";
+      } else {
+        var code = _this.validate.code;
+      }
+
+      if (_this.validate.address === "") {
+        var address = users.address;
+      } else {
+        var address = _this.validate.address;
       }
 
       _this.url = _this.GLOBAL.baseUrl + "/user/edit";
 
       _this.data = {
-        address: users.addresss,
-        avatar: _this.validate.avatar,
-        code: "",
+        address: address,
+        avatar: avatar,
+        code: code,
         email: users.email,
         nickname: users.nickname,
         password: pwd,
@@ -254,13 +312,60 @@ export default {
         username: users.username,
       };
       await API.init(_this.url, _this.data, "post");
-      console.log("修改成功")
-      windows.alert("修改成功")
+      alert('修改成功')
+      this.refreshUser()
+      if ((avatar = _this.validate.avatar)) {
+        localStorage.setItem("avatar", avatar);
+      }
     },
     updateAdminInfo(url) {
       console.log(url);
       this.validate.avatar = url;
       this.user.avatar = url;
+    },
+    async sendCode() {
+      //手机号正则
+      let validate = this.validate
+      var mPattern = /^1[34578]\d{9}$/;
+      if (!mPattern.test(validate.phone)) {
+        alert("手机号格式不正确");
+      } else {
+        (this.url = this.GLOBAL.baseUrl + "/sendCode"),
+          (this.data = {
+            phoneNumber: validate.phone,
+          }),
+          (this.result = await API.init(this.url, this.data, "post"));
+        this.send = true;
+        // 倒计时60s结束后 可再次发送验证码
+        let promise = new Promise((resolve, reject) => {
+          let setTimer = setInterval(() => {
+            this.time = this.time - 1;
+            if (this.time <= 0) {
+              this.send = false;
+              resolve(setTimer);
+              this.time = 60;
+            }
+          }, 1000);
+        });
+        promise.then((setTimer) => {
+          clearInterval(setTimer);
+        });
+      }
+    },
+    async verifyCode() {
+      let validate = this.validate
+      this.url = this.GLOBAL.baseUrl + "/verifyCode",
+        this.data = {
+          phoneNumber: validate.phone,
+          verifyCode: validate.code,
+        },
+        this.result = await API.init(this.url, this.data, "post")
+      if (this.result.code === 1) {
+        alert('验证成功')
+      } else {
+        validate.code === "";
+        alert('验证失败')
+      }
     },
     uploadAvatar(event) {
       console.log("111111111");
@@ -296,6 +401,7 @@ export default {
   background-color: #26a69a;
   height: 300px;
   border-radius: 10px 10px 0 0;
+  
 }
 .avatar {
   width: 200px;
@@ -309,11 +415,12 @@ export default {
 }
 .line {
   border: 0.1px solid rgb(240, 237, 237);
-  width: 270%;
+  width: 200%;
   margin-top: 30px;
 }
 .label {
   margin-left: 100px;
+  display: flex;
 }
 .biankuang {
   display: flex;

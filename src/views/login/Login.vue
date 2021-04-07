@@ -162,8 +162,11 @@ export default {
           this.result = await API.init(this.url,this.data,"post")
           if (this.result.code === 1) {
             //存入token
-            localStorage.setItem("token", res.data.data.token);
-            this.$store.commit("setToken", res.data.data.token);
+            localStorage.setItem("token", this.result.data.token);
+            localStorage.setItem("user", this.result.data.user);
+            localStorage.setItem("userId", this.result.data.user.pkUserId);
+            localStorage.setItem("avatar", this.result.data.user.avatar);
+            this.$store.commit("setToken", this.result.data.token);
             this.$router.push("/");
           }
        
@@ -176,15 +179,15 @@ export default {
             birthday: "",
             code: this.validateForm.code,
             email: "",
-            nickname: "",
-            password: "",
+            nickname: this.validateForm.phone,
+            password: this.validateForm.phone,
             phone: this.validateForm.phone,
             sex: 0,
             username: "",
           },
-         await API.init(this.url,this.data,"post")
-          this.loginNum === 0;
-  
+         this.result = await API.init(this.url,this.data,"post")
+          alert("注册成功")
+          this.loginNum = 0
       }
     },
     changeLogin() {

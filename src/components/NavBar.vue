@@ -1,7 +1,8 @@
 <template>
-  <v-card flat height="75px" tile>
+  <v-card class="static" flat height="70px" tile>
     <v-toolbar>
       <v-toolbar-title
+      @click="goHome()"
         style="color: #26a69a; font-weight: 300; font-size: 1.75rem"
         >骸冰商城</v-toolbar-title
       >
@@ -57,7 +58,7 @@ const API = require("../utils/request.js")
 export default {
   data() {
     return {
-      items: ["用户中心", "订单中心"],
+      items: ["用户中心", "订单中心","发布商品"],
       avatar: localStorage.getItem("avatar"),
       content: "",
       goods:''
@@ -69,9 +70,14 @@ export default {
     goUser(item) {
       if (item === "用户中心") {
         this.$router.push("/message");
-      } else {
+      } else if(item === "订单中心"){
         this.$router.push("/order");
+      } else {
+        this.$router.push("/put");
       }
+    },
+    goHome(){
+      this.$router.push("/");
     },
     goGoods(goods,index) {
       this.$router.push({ path: "/goods", query: { goodsInfo: goods[index] } });
@@ -100,7 +106,28 @@ export default {
   width: 500px;
   height: 50px;
   display: flex;
+  position: relative;
 }
+.input::before {
+  transform: scaleX(0);
+  transform-origin: bottom right;
+}
+.input:hover::before {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+.input::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; right: 0; bottom: 0; left: 0;
+  inset: 0 0 0 0;
+  background: #f6f6f6;
+  border-radius: 20px;
+  z-index: -1;
+  transition: transform .3s ease;
+}
+
 .inputBorder {
   width: 450px;
   height: 45px;
@@ -131,4 +158,8 @@ export default {
   height: 30px;
   margin: 10px;
 }
+// .static {
+//   position: relative;
+//   top:0;
+// }
 </style>
